@@ -1,4 +1,4 @@
-<canvas id="game" width="800" height="900"></canvas>
+<canvas id="game" width="820" height="900"></canvas>
 
 <script>
 class SnakeGame {
@@ -35,12 +35,15 @@ class SnakeGame {
     clearInterval(this.timer);
     
     // Oyun ile alakalı detayları en baştaki haline geri döndür:
-    this.init();
+	if (this.gameStart == false) game.mainmenu();
+	else game.init();
   }
 
   // Oyun döngümüz
   loop() 
   {
+	this.keylistener = true;
+	
     // Matematiksel hesaplamaları yap:
     this.update();
     
@@ -70,7 +73,12 @@ class SnakeGame {
     this.trail.forEach(t => {
       if (this.positionX === t.positionX && this.positionY === t.positionY) {
         // Bastıysa game over olduk, oyunu resetle:
-        this.reset();
+		if (this.tailSize - 15 != 0) 
+		{
+			this.gameStart = false;
+			this.reset();
+		}
+
       }
     });
 
@@ -83,7 +91,8 @@ class SnakeGame {
     }
 
     // Yılan elma yedi mi?
-	if (this.appleX - this.positionX < 2 && this.appleX - this.positionX > -2 && this.appleY - this.positionY < 2 && this.appleY - this.positionY > -2) {
+	this.elmayemearaliği = 1;
+	if (this.appleX - this.positionX < this.elmayemearaliği && this.appleX - this.positionX > -this.elmayemearaliği && this.appleY - this.positionY < this.elmayemearaliği && this.appleY - this.positionY > -this.elmayemearaliği) {
       // Yediyse yılanın boyutu uzat:
       this.tailSize+=5;
       
@@ -98,80 +107,139 @@ class SnakeGame {
   draw() 
   {
     // İlk olarak siyah arkaplanı çiziyoruz
-    this.context.fillStyle = 'black';
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height-100);
+	this.context.fillStyle = 'blue';
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height-80);
 	
-	this.context.fillStyle = 'white';
-    this.context.fillRect(0, this.canvas.height-100, this.canvas.width, this.canvas.height);
-
+    this.context.fillStyle = 'white';
+    this.context.fillRect(10, 10, this.canvas.width-20, this.canvas.height-100);
+	
+	this.context.fillStyle = 'aqua';
+    this.context.fillRect(0, this.canvas.height-80, this.canvas.width, 40);
+	
     // Skoru yazdıralım
     this.context.fillStyle = 'black';
     this.context.font = '30px Arial';
-	this.context.fillText("SCORE ", 20, 840);
-    this.context.fillText(this.tailSize - 15, 140, 840);
+	this.context.fillText("SCORE ", 20, this.canvas.height-100+43);
+    this.context.fillText(this.tailSize - 15, 140, this.canvas.height-100+43);
 	
 	this.context.fillStyle = 'black';
 	this.context.font = '12px Arial';
-	this.context.fillText("Created by Muhammed Sadun Çakmaklı.", 20, 860);
+	this.context.fillText("Created by Muhammed Sadun Çakmaklı.", 20, this.canvas.height-100+55);
 
     // Yılanın herbir karesini sırayla ekrana çiziyoruz
-	this.Random = Math.floor(Math.random() * 2);
-	
-	if (this.Random == 1)
-	  this.context.fillStyle = 'aqua';
-	  
-	if (this.Random == 0)
-	  this.context.fillStyle = 'blue';
-	  
+	  this.context.fillStyle = 'black';
+
     this.trail.forEach(t => {
-      this.context.fillRect(t.positionX * this.gridSize, t.positionY * this.gridSize, this.gridSize - 5, this.gridSize - 5);
+      this.context.fillRect((t.positionX * this.gridSize)+10, (t.positionY * this.gridSize)+10, this.gridSize - 2, this.gridSize - 2);
     });
 
     // Son olarak elmayı ekrana çizdirelim:
-		this.Random = Math.floor(Math.random() * 3);
-	
-	if (this.Random == 2)
-	  this.context.fillStyle = 'white';
-	
-	if (this.Random == 1)
 	  this.context.fillStyle = 'red';
-	  
-	if (this.Random == 0)
-	  this.context.fillStyle = 'yellow';
-    this.context.fillRect(this.appleX * this.gridSize, this.appleY * this.gridSize, this.gridSize - 5, this.gridSize - 5);
+    this.context.fillRect((this.appleX * this.gridSize)+10, (this.appleY * this.gridSize)+10, this.gridSize, this.gridSize);
   }
 
-  // Kullanıcı websayfasındayken bir tuşa bastığında çağrılıyor:
-  onKeyPress(e) {
-    // Kullanıcı sol oka bastı, yılan sağa gitmiyorsa yılanı sola döndür
-    if (e.keyCode === 37 && this.velocityX !== 1) {
-      this.velocityX = -1;
-      this.velocityY = 0;
+  // Kullanıcı web sayfasındayken bir tuşa bastığında çağrılıyor:
+  onKeyPress(e) 
+  {
+    // Kullanıcı sol oka bastı
+    if (e.keyCode === 37) {
+		if(!(this.velocityX == 1 && this.velocityY == 0))
+		{
+			this.keylistener = false;
+			this.velocityX = -1;
+			this.velocityY = 0;
+		}
     }
     
-    // Kullanıcı yukarı oka bastı, yılan aşağı gitmiyorsa yılanı yukarı döndür
-    else if (e.keyCode === 38 && this.velocityY !== 1) {
-      this.velocityX = 0;
-      this.velocityY = -1;
+    // Kullanıcı yukarı oka bastı
+    else if (e.keyCode === 38) {
+		if(!(this.velocityX == 0 && this.velocityY == 1))
+		{
+			this.keylistener = false;
+			this.velocityX = 0;
+			this.velocityY = -1;
+		}
+	  if (this.menu != 1) this.menu--;
     }
     
-    // Kullanıcı sağ oka bastı, yılan sola gitmiyorsa yılanı sağa döndür
-    else if (e.keyCode === 39 && this.velocityX !== -1) {
-      this.velocityX = 1;
-      this.velocityY = 0;
+    // Kullanıcı sağ oka bastı
+    else if (e.keyCode === 39) {
+		if(!(this.velocityX == -1 && this.velocityY == 0))
+		{
+			this.keylistener = false;
+			this.velocityX = 1;
+			this.velocityY = 0;
+		}
     }
     
-    // Kullanıcı aşağı oka bastı, yılan yukarı gitmiyorsa yılanı aşağı döndür
-    if (e.keyCode === 40 && this.velocityY !== -1) {
-      this.velocityX = 0
-      this.velocityY = 1;
+    // Kullanıcı aşağı oka bastı
+    else if (e.keyCode === 40) {
+		if(!(this.velocityX == 0 && this.velocityY == -1))
+		{
+			this.keylistener = false;
+			this.velocityX = 0;
+			this.velocityY = 1;
+		}
+	  if (this.menu != 3) this.menu++;
     }
+	
+	//Kullanıcı entere bastı
+	else if (e.keyCode === 13) {
+		if (this.menu == 1 && this.gameStart == false)
+		{
+			this.gameStart = true;
+			clearInterval(this.timer2);
+			game.init();
+		}
+	}
   }
+  
+  mainmenu()
+  {
+  this.gameStart = false;
+  this.menu = 1;
+  this.timer2 = setInterval(this.writemenu.bind(this), 1000 / 5);
+  }
+  
+  	writemenu()
+	{
+	this.context.fillStyle = 'blue';
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height-80);
+	
+    this.context.fillStyle = 'black';
+    this.context.fillRect(10, 10, this.canvas.width-20, this.canvas.height-100);
+	
+	this.context.fillStyle = 'white';
+	this.context.font = '150px Georgia';
+	this.context.fillText("SNAKE", 175, 200);
+	
+	this.context.fillStyle = 'white';
+	this.context.font = '12px Arial';
+	this.context.fillText("Created by Muhammed Sadun Çakmaklı.", 20, this.canvas.height-100);
+	
+	this.context.font = '20px Arial';
+	if (this.menu == 1)
+	this.context.fillText("-- PLAY GAME --", 330, 300);
+	else
+	this.context.fillText("PLAY GAME", 350, 300);
+	
+	if (this.menu == 2)
+	this.context.fillText("-- OPTIONS --", 340, 340);
+	else
+	this.context.fillText("OPTIONS", 360, 340);
+	
+	if (this.menu == 3)
+	this.context.fillText("-- HIGH SCORES --", 315, 380);
+	else
+	this.context.fillText("HIGH SCORES", 335, 380);
+	}
+  
+  
 }
 
 // Yeni oyun oluştur:
 const game = new SnakeGame();
   
 // Sayfa yüklendiğinde oyunu oynanabilir hale getir:
-window.onload = () => game.init();
+window.onload = () => game.mainmenu();
 </script>
