@@ -5,6 +5,9 @@ class SnakeGame {
 
   constructor() 
   {
+	this.gamefirststart=true;
+	this.speeddif=0;
+	this.score=0;
     this.canvas = document.getElementById('game');
     this.context = this.canvas.getContext('2d');
     
@@ -26,7 +29,8 @@ class SnakeGame {
     // Oyun döngümüz çalışmaya başlıyor.
     // Her saniyede 15 kez çalışacak, yani 15 FPS olacak.
     // Üç boyutlu çok daha büyük oyunlar genelde 60 FPS üzerinde çalışıyor.
-    this.timer = setInterval(this.loop.bind(this), 1000 / 25);
+	if (this.gamefirststart==true)
+    this.timer = setInterval(this.loop.bind(this), 1000 / 15);
   }
 
   reset() 
@@ -36,7 +40,12 @@ class SnakeGame {
     
     // Oyun ile alakalı detayları en baştaki haline geri döndür:
 	if (this.gameStart == false) game.mainmenu();
-	else game.init();
+	else
+	{
+		this.gamefirststart=true;
+		this.speeddif=0;
+		game.init();
+	}
   }
 
   // Oyun döngümüz
@@ -53,6 +62,8 @@ class SnakeGame {
 
   update() 
   {
+	this.gamefirststart=false;
+  
     // Yılanın başını X ve Y koordinat düzleminde gittiği yöne hareket ettir
     this.positionX += this.velocityX;
     this.positionY += this.velocityY;
@@ -75,6 +86,8 @@ class SnakeGame {
         // Bastıysa game over olduk, oyunu resetle:
 		if (this.tailSize - 15 != 0) 
 		{
+			this.gamefirststart=true;
+			this.speeddif=0;
 			this.gameStart = false;
 			this.reset();
 		}
@@ -95,6 +108,12 @@ class SnakeGame {
 	if (this.appleX - this.positionX < this.elmayemearaliği && this.appleX - this.positionX > -this.elmayemearaliği && this.appleY - this.positionY < this.elmayemearaliği && this.appleY - this.positionY > -this.elmayemearaliği) {
       // Yediyse yılanın boyutu uzat:
       this.tailSize+=5;
+	  this.score=this.tailSize*this.speeddif*100;
+	  this.score=this.score-(this.score%1);
+	  this.speeddif+=0.00001*this.tailSize;
+	  
+	  clearInterval(this.timer);
+	  this.timer = setInterval(this.loop.bind(this), 1000 / (15+(this.speeddif*this.tailSize)));
       
       // Ekrana yeni bir elma koymak lazım.
       // Rasgele X ve Y koordinatı üretip oraya elmayı atalım:
@@ -120,11 +139,16 @@ class SnakeGame {
     this.context.fillStyle = 'black';
     this.context.font = '30px Arial';
 	this.context.fillText("SCORE ", 20, this.canvas.height-100+43);
-    this.context.fillText(this.tailSize - 15, 140, this.canvas.height-100+43);
+    this.context.fillText(this.score, 140, this.canvas.height-100+43);
 	
 	this.context.fillStyle = 'black';
 	this.context.font = '12px Arial';
 	this.context.fillText("Created by Muhammed Sadun Çakmaklı.", 20, this.canvas.height-100+55);
+	
+	this.context.fillStyle = 'black';
+	this.context.font = '12px Arial';
+	this.difficult=15+this.speeddif*this.tailSize;
+	this.context.fillText(this.difficult, 400, this.canvas.height-100+55);
 
     // Yılanın herbir karesini sırayla ekrana çiziyoruz
 	  this.context.fillStyle = 'black';
